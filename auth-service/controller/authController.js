@@ -13,7 +13,7 @@ export const login = tryCatch(async (req, res) => {
                   INNER JOIN auth_providers AS au
                   ON u.id = au.user_id
                   WHERE u.email = $1;`;
-  
+
   // Check if email and password exists
   if (!email || !password) {
     console.log("Please provide email and password");
@@ -21,9 +21,7 @@ export const login = tryCatch(async (req, res) => {
     throw new AppError("Please provide email and password", 400);
   }
   // Check if user exists
-  const user = await db.query(query, [
-    email,
-  ]);
+  const user = await db.query(query, [email]);
   if (user.rows.length === 0) {
     throw new AppError("User does not exist", 401);
   }
@@ -65,10 +63,12 @@ export const register = tryCatch(async (req, res) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
   // Save user to database
-  await db.query(
-    "INSERT INTO user_acount (email, first_name, last_name, created_at) VALUES ($1, $2, $3, NOW()) RETURNIG id",
+  const userId = await db.query(
+    "INSERT INTO user_acount (email, first_name, last_name) VALUES ($1, $2, $3) RETURNING id",
     [email, first_name, last_name]
   );
+  const authQuery = `INSERT INTO auth_providers (user_id, password_hash,provider) VALUES ($1, $2,'email')`;
+  await db.query(authQuery, [userId.rows[0].id, hashedPassword]);
   res.status(201).json({
     status: "success",
     message: "User created successfully",

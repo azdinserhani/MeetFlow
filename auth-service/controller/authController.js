@@ -43,6 +43,8 @@ export const login = tryCatch(async (req, res) => {
       message: "Logged in successfully"
     });
   });
+//logout function
+
 });
 
 //register function
@@ -69,5 +71,16 @@ export const register = tryCatch(async (req, res) => {
   res.status(201).json({
     status: "success",
     message: "User created successfully",
+  });
+});
+
+export const logout = tryCatch(async (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.status(200).json({
+    status: "success",
+    message: "Logged out successfully",
   });
 });

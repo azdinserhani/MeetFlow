@@ -17,8 +17,6 @@ export const login = tryCatch(async (req, res) => {
 
   // Check if email and password exists
   if (!email || !password) {
-    
-
     throw new AppError("Please provide email and password", 400);
   }
   // Check if user exists
@@ -31,10 +29,10 @@ export const login = tryCatch(async (req, res) => {
   bcrypt.compare(password, user.rows[0].password_hash, (err, result) => {
     if (!result) {
       throw new AppError("Invalid password", 401);
-    }
+    }    
     // Create token
     const token = jwt.sign(
-      { id: user.rows[0].id, email: user.rows[0].email },
+      { id: user.rows[0].id, role: user.rows[0].role, email: user.rows[0].email },
       process.env.JWT_SECRET,
       {
         expiresIn: "90d",

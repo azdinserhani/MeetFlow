@@ -3,6 +3,7 @@ import db from "../config/db.js";
 import AppError from "../utils/AppError.js";
 import bcrypt from "bcrypt";
 import { userValidationSchema } from "../validations/uservalidation.js";
+import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 //login function
 export const login = tryCatch(async (req, res) => {

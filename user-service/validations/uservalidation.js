@@ -13,10 +13,6 @@ export const userValidationSchema = Joi.object({
         'string.max': 'Last name must be less than or equal to 30 characters long.',
         'any.required': 'Last name is required.'
     }),
-    password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required().messages({
-        'string.pattern.base': 'Password must be between 3 and 30 characters long and contain only alpha-numeric characters.',
-        'any.required': 'Password is required.'
-    }),
     email: Joi.string().email().required().messages({
         'string.email': 'Email must be a valid email address.',
         'any.required': 'Email is required.'

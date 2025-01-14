@@ -9,8 +9,14 @@ export const verifyToken = (req, res, next) => {
     }
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
       if (err) {
+        if (err.name === "TokenExpiredError") {
+          throw new AppError("Token expired", 401);
+        }
         throw new AppError("Invalid token", 401);
       }
+
+   
+
       req.user = user;
     });
     next();
@@ -19,8 +25,14 @@ export const verifyToken = (req, res, next) => {
   }
 };
 export const verifyAuth = (req, res, next) => {
-  if (!req.user) {
-    throw new AppError("You are not authorized to access this route", 401);
-  }
-  next();
+  verifyToken(req, res, () => {
+    
+    
+    if (req.user.id != req.params.id) {
+      
+      throw new AppError("You are not authorized", 401);
+    }
+    next();
+
+  });
 };

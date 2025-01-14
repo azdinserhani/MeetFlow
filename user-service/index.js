@@ -4,7 +4,7 @@ import userRoute from "./routes/userRoute.js";
 import cokieParser from "cookie-parser";
 import errorHandler from "./middleware/errorHandler.js";
 const app = express();
-const port = 3000;
+const port = process.env.PORT ;
 app.use(cors());
 app.use(express.json());
 app.use(cokieParser());

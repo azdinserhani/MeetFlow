@@ -6,6 +6,11 @@ const errorHandler = (err, req, res, next) => {
       .status(err.statusCode)
       .json({ status: err.status, message: err.message });
   }
+  if (err.name === "TokenExpiredError") {
+    return res
+      .status(401)
+      .json({ status: "fail", message: "Invalid token" });
+  }
   if (err.isJoi) {
     return res
       .status(400)

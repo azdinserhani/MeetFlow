@@ -3,13 +3,13 @@ import db from "../config/db.js";
 import AppError from "../utils/AppError.js";
 import bcrypt from "bcrypt";
 import { userValidationSchema } from "../validations/uservalidation.js";
-import nodemailer from "nodemailer";
+
 import jwt from "jsonwebtoken";
 //login function
 export const login = tryCatch(async (req, res) => {
   const { email, password } = req.body;
 
-  const query = `SELECT u.email,au.password_hash
+  const query = `SELECT u.id,u.email,au.password_hash
                   FROM user_acount AS u
                   INNER JOIN auth_providers AS au
                   ON u.id = au.user_id
@@ -17,7 +17,7 @@ export const login = tryCatch(async (req, res) => {
 
   // Check if email and password exists
   if (!email || !password) {
-    console.log("Please provide email and password");
+    
 
     throw new AppError("Please provide email and password", 400);
   }
@@ -32,11 +32,14 @@ export const login = tryCatch(async (req, res) => {
     if (!result) {
       throw new AppError("Invalid password", 401);
     }
-
     // Create token
-    const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign(
+      { id: user.rows[0].id, email: user.rows[0].email },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "90d",
+      }
+    );
     // Send token in cookie
     res.cookie("token", token, {
       httpOnly: true,

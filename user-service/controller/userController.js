@@ -37,3 +37,17 @@ export const updateUser = tryCatch(async (req, res) => {
         data: user.rows[0],
     });
 });
+
+//delete user by
+export const deleteUser = tryCatch(async (req, res) => {
+  const userId = req.user.id;
+    const query = "DELETE FROM user_acount WHERE id = $1";
+    const user = await db.query(query, [userId]);
+    if (user.rowCount === 0) {
+        throw new AppError("User not found", 404);
+    }
+  res.status(200).json({
+    status: "success",
+    data: "User deleted successfully",
+  });
+});

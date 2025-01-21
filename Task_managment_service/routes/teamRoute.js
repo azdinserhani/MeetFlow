@@ -1,6 +1,6 @@
 import express from "express";
 import { createTeam, updateTeam } from "../controller/teamController.js";
-import { verifyToken } from "../middleware/verifyToken.js";
+import {  verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
 

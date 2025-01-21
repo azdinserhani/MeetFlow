@@ -6,12 +6,10 @@ import db from "../config/db.js";
 export const verifyToken = (req, res, next) => {
   try {
     const token = req.cookies.token;
-     console.log(token);
     if (!token) {
       throw new AppError("Please login to get access", 401);
     }
-   
-    
+
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
       if (err) {
         if (err.name === "TokenExpiredError") {
@@ -35,19 +33,3 @@ export const verifyAuth = (req, res, next) => {
     next();
   });
 };
-
-export const verifyAdmin = tryCatch((req, res, next) => {
-  verifyToken(req, res, async () => {
-    const userId = req.user.id;
-    const userRole = await db.query(
-      "SELECT * FROM user_roles WHERE id = $1",
-      [userId]
-    );
-   
-
-    if (userRole.rows[0].role !== "admin") {
-      throw new AppError("You are not authorized", 401);
-    }
-    next();
-  });
-});

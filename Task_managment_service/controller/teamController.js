@@ -17,9 +17,15 @@ export const createTeam = tryCatch(async (req, res) => {
     );
   }
   const team = await db.query(
-    "INSERT INTO team(name,description,team_img) VALUES($1,$2,$3)",
+    "INSERT INTO team(name,description,team_img) VALUES($1,$2,$3) RETURNING *",
     [name, description, team_img]
   );
+  await db.query("INSERT INTO user_roles VALUES($1,$2,$3)", [
+    req.user.id,
+    team.rows[0].id,
+    "admin",
+  ]);
+
   res.status(200).json({
     status: "succuss",
     data: "team created succuss",
@@ -31,6 +37,18 @@ export const updateTeam = tryCatch(async (req, res) => {
   const { name, description, team_img } =
     await teamValidationSchema.validateAsync(req.body);
 
+  const role = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id= $2",
+    [req.user.id, teamId]
+  );
+
+     if (role.rows.length === 0) {
+       throw new AppError("Team not found or insufficient permissions", 400);
+  }
+  if (role.rows[0].role !== "admin") {
+     throw new AppError("You don't have  permissions to update this team", 400);
+  }
+ 
   // Find if team exists
   const foundQuery = "SELECT * FROM team WHERE id=$1";
   const foundTeam = await db.query(foundQuery, [teamId]);
@@ -73,4 +91,3 @@ export const updateTeam = tryCatch(async (req, res) => {
     data: "Team updated successfully",
   });
 });
-

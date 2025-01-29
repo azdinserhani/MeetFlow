@@ -42,13 +42,13 @@ export const updateTeam = tryCatch(async (req, res) => {
     [req.user.id, teamId]
   );
 
-     if (role.rows.length === 0) {
-       throw new AppError("Team not found or insufficient permissions", 400);
+  if (role.rows.length === 0) {
+    throw new AppError("Team not found or insufficient permissions", 400);
   }
   if (role.rows[0].role !== "admin") {
-     throw new AppError("You don't have  permissions to update this team", 400);
+    throw new AppError("You don't have  permissions to update this team", 400);
   }
- 
+
   // Find if team exists
   const foundQuery = "SELECT * FROM team WHERE id=$1";
   const foundTeam = await db.query(foundQuery, [teamId]);
@@ -91,3 +91,33 @@ export const updateTeam = tryCatch(async (req, res) => {
     data: "Team updated successfully",
   });
 });
+
+export const deleteTeam = tryCatch(async (req, res) => {
+  const teamId = req.params.id;
+
+  const role = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [req.user.id, teamId]
+  );
+
+  if (role.rows.length === 0) {
+    throw new AppError("Team not found or insufficient permissions", 400);
+  }
+  if (role.rows[0].role !== "admin") {
+    throw new AppError("You don't have permissions to delete this team", 400);
+  }
+
+  const foundTeam = await db.query("SELECT * FROM team WHERE id=$1", [teamId]);
+  if (foundTeam.rows.length === 0) {
+    throw new AppError("Team not found", 404);
+  }
+
+  await db.query("DELETE FROM team WHERE id=$1", [teamId]);
+  await db.query("DELETE FROM user_roles WHERE team_id=$1", [teamId]);
+
+  res.status(200).json({
+    status: "success",
+    data: "Team deleted successfully",
+  });
+});
+

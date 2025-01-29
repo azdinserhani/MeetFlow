@@ -121,3 +121,39 @@ export const deleteTeam = tryCatch(async (req, res) => {
   });
 });
 
+export const getTeam = tryCatch(async (req, res) => {
+  const teamId = req.params.id;
+console.log(teamId);
+
+  const team = await db.query("SELECT * FROM team WHERE id=$1", [teamId]);
+  if (team.rows.length === 0) {
+    throw new AppError("Team not found", 404);
+  } 
+
+  res.status(200).json({
+    status: "success",
+    data: team.rows[0],
+  });
+});
+
+export const getTeams = tryCatch(async (req, res) => { 
+  const teams = await db.query("SELECT * FROM team");
+  res.status(200).json({
+    status: "success",
+    results: teams.rows.length,
+    data: teams.rows,
+  });
+});
+
+export const getTeamMembers = tryCatch(async (req, res) => { 
+  const teamId = req.params.id;
+  const teamMembers = await db.query(
+    "SELECT * FROM user_acount WHERE id IN (SELECT user_id FROM user_roles WHERE team_id=$1)",
+    [teamId]
+  );
+  res.status(200).json({
+    status: "success",
+    results: teamMembers.rows.length,
+    data: teamMembers.rows,
+  });
+});

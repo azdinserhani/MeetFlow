@@ -73,4 +73,28 @@ export const updateProject = tryCatch(async (req, res) => {
     data: updatedProject.rows[0],
   });
 
+}); 
+
+export const deleteProject = tryCatch(async (req, res) => {
+  const { id } = req.params;
+  const project = await db.query("SELECT * FROM project WHERE id=$1", [id]);
+  if (project.rows.length === 0) {
+    throw new AppError("project not found", 404);
+  }
+  const userRole = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [req.user.id, project.rows[0].team_id]
+  );
+  if (!userRole.rows.length || userRole.rows[0].role !== "organizer") {
+    throw new AppError(
+      "You don't have permissions to delete this project",
+      400
+    );
+  }
+  await db.query("DELETE FROM project WHERE id=$1", [id]);
+  res.status(200).json({
+    status: "success",
+    data: null,
+  });
 });
+ 

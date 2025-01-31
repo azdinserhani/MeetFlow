@@ -1,9 +1,10 @@
 import express from 'express';
 import { verifyRole, verifyToken } from '../middleware/verifyToken.js';
-import { createProject, getAllProjects, getProjectById, updateProject } from '../controller/projectController.js';
+import { createProject, deleteProject, getAllProjects, getProjectById, updateProject } from '../controller/projectController.js';
 const router = express.Router();
 router.post("/", verifyToken, verifyRole("organizer"), createProject);
 router.get('/', verifyToken, getAllProjects);
 router.get('/:id', verifyToken, getProjectById);
 router.put('/:id', verifyToken, updateProject);
+router.delete('/:id', verifyToken, deleteProject);
 export default router;

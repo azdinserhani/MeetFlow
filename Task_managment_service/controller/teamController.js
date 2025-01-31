@@ -123,12 +123,12 @@ export const deleteTeam = tryCatch(async (req, res) => {
 
 export const getTeam = tryCatch(async (req, res) => {
   const teamId = req.params.id;
-console.log(teamId);
+  console.log(teamId);
 
   const team = await db.query("SELECT * FROM team WHERE id=$1", [teamId]);
   if (team.rows.length === 0) {
     throw new AppError("Team not found", 404);
-  } 
+  }
 
   res.status(200).json({
     status: "success",
@@ -136,7 +136,7 @@ console.log(teamId);
   });
 });
 
-export const getTeams = tryCatch(async (req, res) => { 
+export const getTeams = tryCatch(async (req, res) => {
   const teams = await db.query("SELECT * FROM team");
   res.status(200).json({
     status: "success",
@@ -145,7 +145,7 @@ export const getTeams = tryCatch(async (req, res) => {
   });
 });
 
-export const getTeamMembers = tryCatch(async (req, res) => { 
+export const getTeamMembers = tryCatch(async (req, res) => {
   const teamId = req.params.id;
   const teamMembers = await db.query(
     "SELECT * FROM user_acount WHERE id IN (SELECT user_id FROM user_roles WHERE team_id=$1)",
@@ -155,5 +155,123 @@ export const getTeamMembers = tryCatch(async (req, res) => {
     status: "success",
     results: teamMembers.rows.length,
     data: teamMembers.rows,
+  });
+});
+
+export const addMemberToTeam = tryCatch(async (req, res) => {
+  const teamId = req.params.id;
+  const userId = req.body.userId;
+  const userRole = req.body.role;
+
+  const role = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [req.user.id, teamId]
+  );
+  if (role.rows[0].role !== "admin") {
+    throw new AppError(
+      "You don't have permissions to add user to this team",
+      400
+    );
+  }
+  const checkIfExist = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [userId, teamId]
+  );
+  if (checkIfExist.rows.length > 0) {
+    throw new AppError("user already in this team", 400);
+  }
+
+  await db.query("INSERT INTO user_roles VALUES($1,$2,$3)", [
+    userId,
+    teamId,
+    userRole,
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    data: "user added to team successfully",
+  });
+});
+
+
+export const removeMemberFromTeam = tryCatch(async (req, res) => { 
+  const teamId = req.params.id;
+  const userId = req.body.userId;
+
+  const role = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [req.user.id, teamId]
+  );
+  if (role.rows[0].role !== "admin") {
+    throw new AppError(
+      "You don't have permissions to remove user from this team",
+      400
+    );
+  }
+
+  const checkIfExist = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [userId, teamId]
+  );
+  if (checkIfExist.rows.length === 0) {
+    throw new AppError("user not in this team", 400);
+  }
+
+  await db.query("DELETE FROM user_roles WHERE user_id=$1 AND team_id=$2", [
+    userId,
+    teamId,
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    data: "user removed from team successfully",
+  });
+});
+
+export const getProjectsForTeam = tryCatch(async (req, res) => { 
+  const teamId = req.params.id;
+  const projects = await db.query("SELECT * FROM project WHERE team_id=$1", [
+    teamId,
+  ]);
+  res.status(200).json({
+    status: "success",
+    results: projects.rows.length,
+    data: projects.rows,
+  });
+});
+// change user role in a team
+export const changeUserRole = tryCatch(async (req, res) => { 
+  const teamId = req.params.id;
+  const userId = req.body.userId;
+  const userRole = req.body.role;
+
+  const role = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [req.user.id, teamId]
+  );
+  if (role.rows[0].role !== "admin") {
+    throw new AppError(
+      "You don't have permissions to change user role in this team",
+      400
+    );
+  }
+
+  const checkIfExist = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
+    [userId, teamId]
+  );
+  if (checkIfExist.rows.length === 0) {
+    throw new AppError("user not in this team", 400);
+  }
+
+  await db.query("UPDATE user_roles SET role=$1 WHERE user_id=$2 AND team_id=$3", [
+    userRole,
+    userId,
+    teamId,
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    data: "user role changed successfully",
   });
 });

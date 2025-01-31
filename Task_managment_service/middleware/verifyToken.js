@@ -24,12 +24,25 @@ export const verifyToken = (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-export const verifyAuth = (req, res, next) => {
-  verifyToken(req, res, () => {
-    if (req.user.id != req.params.id) {
-      throw new AppError("You are not authorized", 401);
+}
+export const verifyRole = (role) => {
+  console.log(role);
+
+  return tryCatch(async (req, res, next) => {
+    const userRole = await db.query(
+      "SELECT * FROM user_roles WHERE user_id=$1",
+      [req.user.id]
+    );
+
+
+    if (!userRole.rows.length || userRole.rows[0].role !== role) {
+      throw new AppError(
+        "You don't have permissions to create a project in this team",
+        400
+      );
     }
+
+
     next();
   });
 };

@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express, { Router } from 'express'
 import {
   addMemberToTeam,
   changeUserRole,
@@ -9,20 +9,25 @@ import {
   getTeamMembers,
   getTeams,
   removeMemberFromTeam,
-  updateTeam,
-} from "../controller/teamController.js";
-import { verifyToken } from "../middleware/verifyToken.js";
+  updateTeam
+} from '../controller/teamController.js'
+import { verifyRole, verifyToken } from '../middleware/verifyToken.js'
 
-const router = express.Router();
+const router = express.Router()
 
-router.post("/", verifyToken, createTeam);
-router.put("/:id", verifyToken, updateTeam);
-router.delete("/:id", verifyToken, deleteTeam);
-router.get("/:id", verifyToken, getTeam);
-router.get("/", verifyToken, getTeams);
-router.get("/:id/members", verifyToken, getTeamMembers);
-router.post("/:id/user", verifyToken, addMemberToTeam);
-router.delete("/:id/user", verifyToken, removeMemberFromTeam);
-router.get("/:id/projects", verifyToken, getProjectsForTeam);
-router.put("/:id/user", verifyToken, changeUserRole);
-export default router;
+router.post('/', verifyToken, verifyRole('organizer'), createTeam)
+router.put('/:id', verifyToken, verifyRole('admin'), updateTeam)
+router.delete('/:id', verifyToken, verifyRole('admin'), deleteTeam)
+router.get('/:id', verifyToken, getTeam)
+router.get('/', verifyToken, getTeams)
+router.get('/:id/members', verifyToken, getTeamMembers)
+router.post('/:id/user', verifyToken, verifyRole('admin'), addMemberToTeam)
+router.delete(
+  '/:id/user',
+  verifyToken,
+  verifyRole('admin'),
+  removeMemberFromTeam
+)
+router.get('/:id/projects', verifyToken, getProjectsForTeam)
+router.put("/:id/user", verifyToken, verifyRole("admin"), changeUserRole);
+export default router

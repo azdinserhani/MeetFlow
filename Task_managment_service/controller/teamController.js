@@ -193,8 +193,7 @@ export const addMemberToTeam = tryCatch(async (req, res) => {
   });
 });
 
-
-export const removeMemberFromTeam = tryCatch(async (req, res) => { 
+export const removeMemberFromTeam = tryCatch(async (req, res) => {
   const teamId = req.params.id;
   const userId = req.body.userId;
 
@@ -228,7 +227,7 @@ export const removeMemberFromTeam = tryCatch(async (req, res) => {
   });
 });
 
-export const getProjectsForTeam = tryCatch(async (req, res) => { 
+export const getProjectsForTeam = tryCatch(async (req, res) => {
   const teamId = req.params.id;
   const projects = await db.query("SELECT * FROM project WHERE team_id=$1", [
     teamId,
@@ -240,7 +239,7 @@ export const getProjectsForTeam = tryCatch(async (req, res) => {
   });
 });
 // change user role in a team
-export const changeUserRole = tryCatch(async (req, res) => { 
+export const changeUserRole = tryCatch(async (req, res) => {
   const teamId = req.params.id;
   const userId = req.body.userId;
   const userRole = req.body.role;
@@ -264,11 +263,10 @@ export const changeUserRole = tryCatch(async (req, res) => {
     throw new AppError("user not in this team", 400);
   }
 
-  await db.query("UPDATE user_roles SET role=$1 WHERE user_id=$2 AND team_id=$3", [
-    userRole,
-    userId,
-    teamId,
-  ]);
+  await db.query(
+    "UPDATE user_roles SET role=$1 WHERE user_id=$2 AND team_id=$3",
+    [userRole, userId, teamId]
+  );
 
   res.status(200).json({
     status: "success",

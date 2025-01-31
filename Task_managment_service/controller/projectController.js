@@ -5,7 +5,8 @@ import AppError from "../utils/AppError.js";
 
 
 export const createProject = tryCatch(async (req, res) => {
-  const { team_id, name, description, status, start_date, end_date } =
+  const team_id = req.params.id;
+  const {  name, description, status, start_date, end_date } =
     await projectValidationSchema.validateAsync(req.body);
     const checkIfExist = await db.query("SELECT * FROM project WHERE name LIKE $1", [name]);
     if (checkIfExist.rows.length > 0) {
@@ -22,9 +23,18 @@ export const createProject = tryCatch(async (req, res) => {
 });
 
 export const getAllProjects = tryCatch(async (req, res) => {
-  const projects = await db.query("SELECT * FROM project");
+  const userRole = await db.query(
+    "SELECT * FROM user_roles WHERE user_id=$1 AND role='organizer'",
+    [req.user.id]
+  );
+  if (!userRole.rows.length) {
+    throw new AppError("You don't have permissions to view projects", 400);
+  }
+  const projects = await db.query("SELECT * FROM project WHERE team_id=$1", [userRole.rows[0].team_id]);
+
   res.status(200).json({
     status: "success",
+    result: projects.rows.length,
     data: projects.rows,
   });
 });

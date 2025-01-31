@@ -20,7 +20,7 @@ router.put('/:id', verifyToken, verifyRole('admin'), updateTeam)
 router.delete('/:id', verifyToken, verifyRole('admin'), deleteTeam)
 router.get('/:id', verifyToken, getTeam)
 router.get('/', verifyToken, getTeams)
-router.get('/:id/members', verifyToken, getTeamMembers)
+router.get('/:id/members', verifyToken,verifyRole("admin"), getTeamMembers)
 router.post('/:id/user', verifyToken, verifyRole('admin'), addMemberToTeam)
 router.delete(
   '/:id/user',

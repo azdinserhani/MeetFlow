@@ -14,3 +14,12 @@ export const projectValidationSchema = Joi.object({
   end_date: Joi.date().optional(),
   
 });
+export const taskValidationSchema = Joi.object({
+  project_id: Joi.required(),
+  title: Joi.string().min(3).max(100).required(),
+  description: Joi.string().max(255).optional(),
+  status: Joi.string().valid('pending', 'in-progress', 'completed').required(),
+  priority: Joi.string().valid('low', 'medium', 'high').required(),
+  start_date: Joi.date().required(),
+  end_date: Joi.date().optional(),
+});

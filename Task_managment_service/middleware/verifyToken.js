@@ -26,8 +26,6 @@ export const verifyToken = (req, res, next) => {
   }
 };
 export const verifyRole = (role) => {
-
-
   return tryCatch(async (req, res, next) => {
     const userRole = await db.query(
       "SELECT * FROM user_roles WHERE user_id=$1 AND team_id=$2",
@@ -45,28 +43,57 @@ export const verifyRole = (role) => {
   });
 };
 
-export const verifyTaskRole = () => {
+export const verifyTaskRole = (roles) => {
   return tryCatch(async (req, res, next) => {
-    const check = await db.query(
-      `SELECT p.id,u.*
-                                    FROM user_roles u
-                                    INNER JOIN project p
-                                    on u.team_id = p.team_id
-                                    where u.role LIKE 'admin'
-                                    AND p.id = $1`,
-      [req.body.project_id]
+    const teamId = await db.query(
+      `SELECT *
+FROM team t
+INNER JOIN project p
+ON p.team_id = t.id
+where p.id = $1`,
+      [req.params.project_id]
     );
-    console.log(check.rows);
-    
-    if (check.rows.length === 0) {
+    console.log(teamId.rows);
+
+    if (teamId.rows.length === 0) {
+      return next(new AppError("Project not found", 404));
+    }
+    const userRole = await db.query(
+      `SELECT *
+FROM user_roles u 
+where u.team_id =$1
+AND u.user_id = $2`,
+      [teamId.rows[0].team_id, req.user.id]
+    );
+    console.log(userRole.rows);
+
+    if (userRole.rows.length === 0) {
       return next(
-        new AppError(
-          "You are not authorized to create task in this project",
-          401
-        )
+        new AppError("You don't have permissions to handle this task", 400)
       );
     }
-
+    if (!roles.includes(userRole.rows[0].role)) {
+      return next(
+        new AppError("You don't have permissions to handle this task", 400)
+      );
+    }
     next();
   });
 };
+
+export const verifyAssignTask = tryCatch(async(req,res,next) => {
+  // return tryCatch(async (req, res, next) => {
+
+    
+    const teamId = await db.query(
+      `SELECT user_id FROM user_roles WHERE team_id=$1`,
+      [req.params.team_id]
+    );
+  teamId.rows.forEach((element) => { 
+    
+    
+  });
+    
+    next();
+  // });
+});

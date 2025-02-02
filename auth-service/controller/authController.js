@@ -26,27 +26,29 @@ export const login = tryCatch(async (req, res) => {
   }
 
   // Check if password is correct
-  bcrypt.compare(password, user.rows[0].password_hash, (err, result) => {
-    if (!result) {
-      throw new AppError("Invalid password", 401);
-    }    
-    // Create token
-    const token = jwt.sign(
-      { id: user.rows[0].id, role: user.rows[0].role, email: user.rows[0].email },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "90d",
-      }
-    );
-    // Send token in cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Logged in successfully",
-    });
+  const isPasswordCorrect = await bcrypt.compare(
+    password,
+    user.rows[0].password_hash
+  );
+  if (!isPasswordCorrect) {
+    throw new AppError("Invalid password", 401);
+  }
+  // Create token
+  const token = jwt.sign(
+    { id: user.rows[0].id, role: user.rows[0].role, email: user.rows[0].email },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "90d",
+    }
+  );
+  // Send token in cookie
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.status(200).json({
+    status: "success",
+    message: "Logged in successfully",
   });
 });
 

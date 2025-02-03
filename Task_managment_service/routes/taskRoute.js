@@ -3,6 +3,8 @@ import {
   assignTask,
   createTask,
   deleteTask,
+  getAssignedTasks,
+  getAssignedTasksByUserId,
   getTasks,
   unassignTask,
   updateTask,
@@ -43,4 +45,11 @@ router.delete(
   checkTeamMember,
   unassignTask
 );
+router.get("/", verifyToken, getAssignedTasks);
+router.get("/assigned/:user_id", verifyToken, getAssignedTasksByUserId);
+
+//TODO:
+// GET /unassigned → Fetch tasks that are not assigned to any team or user.
+//GET /analytics/team/:team_id/tasks → Get the number of tasks assigned and completed by a team.
+// GET /analytics/project/:project_id/tasks → Get total tasks in a project with status breakdown
 export default router;

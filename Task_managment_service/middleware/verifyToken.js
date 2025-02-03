@@ -77,6 +77,18 @@ export const verifyTaskRole = (roles) => {
         new AppError("You don't have permissions to handle this task", 400)
       );
     }
+    const assignUserTask = await db.query(
+      `SELECT *
+      FROM task_assign t
+      where t.task_id =$1
+      AND t.user_id = $2`,
+      [req.params.id, req.user.id]
+    );
+    if (assignUserTask.rows.length === 0) {
+      return next(
+        new AppError("You don't have permissions to handle this task", 400)
+      );
+    }
     next();
   });
 };
@@ -113,4 +125,10 @@ export const checkTaskAssignment = tryCatch(async (req, res, next) => {
   next();
 });
 
-export const verifyAssignTask = [checkUserRole, checkTeamMember, checkTaskAssignment];
+export const verifyAssignTask = [
+  checkUserRole,
+  checkTeamMember,
+  checkTaskAssignment,
+];
+
+

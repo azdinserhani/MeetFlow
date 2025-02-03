@@ -138,3 +138,51 @@ export const unassignTask = tryCatch(async (req, res, next) => {
     status: "success",
   });
 });
+
+export const getAssignedTasks = tryCatch(async (req, res, next) => {
+  const tasks = await db.query(
+    `SELECT t.*
+    FROM task t
+    JOIN task_assign ta ON t.id = ta.task_id
+    WHERE ta.user_id = $1`,
+    [req.user.id]
+  );
+  res.status(200).json({
+    status: "success",
+    result: tasks.rows.length,
+    data: tasks.rows,
+  });
+});
+export const getAssignedTasksByUserId = tryCatch(async (req, res, next) => {
+  const userRole = await db.query(
+    `SELECT role
+      FROM user_roles
+      WHERE team_id = (SELECT team_id
+      FROM user_roles
+      WHERE user_id = $1)
+      AND user_id = $2`,
+    [req.params.user_id, req.user.id]
+  );
+  console.log(userRole.rows[0].role);
+  if (userRole.rows[0].role !== "admin" || userRole.rows[0].role !== "organizer") {
+    return next(
+      new AppError(
+        "You don't have permissions to get assign task for this user",
+        400
+      )
+    );
+  }
+  const tasks = await db.query(
+    `SELECT t.* 
+    FROM task t 
+    JOIN task_assign ta ON t.id = ta.task_id 
+    WHERE ta.user_id = $1`,
+    [req.params.user_id]
+  );
+
+  res.status(200).json({
+    status: "success",
+    result: tasks.rows.length,
+    data: tasks.rows,
+  });
+});

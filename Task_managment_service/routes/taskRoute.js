@@ -4,9 +4,12 @@ import {
   createTask,
   deleteTask,
   getTasks,
+  unassignTask,
   updateTask,
 } from "../controller/taskController.js";
 import {
+  checkTeamMember,
+  checkUserRole,
   verifyAssignTask,
   verifyTaskRole,
   verifyToken,
@@ -33,4 +36,11 @@ router.patch(
   updateTask
 );
 router.post("/:id/:team_id/assign", verifyToken, verifyAssignTask, assignTask);
+router.delete(
+  "/:id/:team_id/unassign",
+  verifyToken,
+  checkUserRole,
+  checkTeamMember,
+  unassignTask
+);
 export default router;

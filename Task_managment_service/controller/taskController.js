@@ -45,7 +45,6 @@ export const deleteTask = tryCatch(async (req, res, next) => {
   });
 });
 
-
 export const updateTask = tryCatch(async (req, res, next) => {
   const {
     project_id,
@@ -115,7 +114,7 @@ export const updateTask = tryCatch(async (req, res, next) => {
   });
 });
 
-export const assignTask = tryCatch(async (req, res, next) => { 
+export const assignTask = tryCatch(async (req, res, next) => {
   const { user_id } = req.body;
   const task = await db.query(
     `INSERT INTO task_assign (task_id, user_id) VALUES ($1, $2) RETURNING *`,
@@ -124,5 +123,18 @@ export const assignTask = tryCatch(async (req, res, next) => {
   res.status(201).json({
     status: "success",
     data: task.rows[0],
+  });
+});
+
+export const unassignTask = tryCatch(async (req, res, next) => {
+  const task = await db.query(
+    "DELETE FROM task_assign WHERE task_id=$1 AND user_id=$2",
+    [req.params.id, req.body.user_id]
+  );
+  if (task.rowCount === 0) {
+    return next(new AppError("Task not found", 404));
+  }
+  res.status(204).json({
+    status: "success",
   });
 });

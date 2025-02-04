@@ -1,4 +1,4 @@
-import AppError from "../utils/AppError.js";
+import AppError from "../utils/AppError.mjs";
 
 const errorHandler = (err, req, res, next) => {
   if (err instanceof AppError) {
@@ -7,9 +7,7 @@ const errorHandler = (err, req, res, next) => {
       .json({ status: err.status, message: err.message });
   }
   if (err.name === "TokenExpiredError") {
-    return res
-      .status(401)
-      .json({ status: "fail", message: "Invalid token" });
+    return res.status(401).json({ status: "fail", message: "Invalid token" });
   }
   if (err.isJoi) {
     return res

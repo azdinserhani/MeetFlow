@@ -1,7 +1,7 @@
-import { tryCatch } from "../utils/tryCatch.js";
-import db from "../config/db.js";
-import AppError from "../utils/AppError.js";
-import { userValidationSchema } from "../validations/uservalidation.js";
+import { tryCatch } from "../utils/tryCatch.mjs";
+import db from "../config/db.mjs";
+import AppError from "../utils/AppError.mjs";
+import { userValidationSchema } from "../validations/uservalidation.mjs";
 
 //get user by id
 export const getUserById = tryCatch(async (req, res) => {

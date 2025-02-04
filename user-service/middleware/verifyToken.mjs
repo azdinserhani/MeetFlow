@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import AppError from "../../auth-service/utils/AppError.js";
-import { tryCatch } from "../utils/tryCatch.js";
-import db from "../config/db.js";
+import AppError from "../utils/AppError.mjs";
+import { tryCatch } from "../utils/tryCatch.mjs";
+import db from "../config/db.mjs";
 
 export const verifyToken = (req, res, next) => {
   try {
@@ -36,11 +36,9 @@ export const verifyAuth = (req, res, next) => {
 export const verifyAdmin = tryCatch((req, res, next) => {
   verifyToken(req, res, async () => {
     const userId = req.user.id;
-    const userRole = await db.query(
-      "SELECT * FROM user_roles WHERE id = $1",
-      [userId]
-    );
-   
+    const userRole = await db.query("SELECT * FROM user_roles WHERE id = $1", [
+      userId,
+    ]);
 
     if (userRole.rows[0].role !== "admin") {
       throw new AppError("You are not authorized", 401);

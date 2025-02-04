@@ -29,4 +29,9 @@ describe("get user by id", () => {
       },
     });
   });
+    it('should call sendStatus with 404 when user not found', () => {
+        mockRequest.params.id = 1001;
+        getUserById(mockRequest, mockResponse);
+        expect(mockResponse.status).toHaveBeenCalledWith(404);
+    });
 });

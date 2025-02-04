@@ -54,16 +54,13 @@ export const deleteUser = tryCatch(async (req, res) => {
 
 //get all user
 export const getAllUser = tryCatch(async (req, res) => {
-  const queryTeamId =
-    "SELECT team_id FROM user_roles WHERE user_id = $1 GROUP BY team_id";
-  const teamId = await db.query(queryTeamId, [req.user.id]);
-
-  const query = `SELECT *
-                  FROM user_acount us
-                  INNER JOIN user_roles ur
-                  ON us.id = ur.user_id 
-                  WHERE ur.team_id = $1`;
-  const users = await db.query(query, [teamId.rows[0].team_id]);
+  const query = `SELECT DISTINCT us.*
+              FROM user_acount us
+              INNER JOIN user_roles ur ON us.id = ur.user_id
+              WHERE ur.team_id IN (
+                  SELECT team_id FROM user_roles WHERE user_id = $1
+              );`;
+  const users = await db.query(query, [req.user.id]);
   res.status(200).json({
     status: "succuss",
     result: users.rowCount,

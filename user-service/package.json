@@ -4,7 +4,6 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "jest",
     "start": "nodemon server.mjs",
     "debug": "ndb server.js"
   },

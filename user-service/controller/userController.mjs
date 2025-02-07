@@ -20,10 +20,19 @@ export const getUserById = tryCatch(async (req, res) => {
 export const updateUser = tryCatch(async (req, res) => {
   const userId = req.user.id;
   const { profileImg } = req.body;
-  const { email, first_name, last_name } =
-    await userValidationSchema.validateAsync(req.body);
-  const query =
-    "UPDATE user_acount SET email = $1, first_name = $2, last_name = $3, profile_img = $4,updated_at = $5 WHERE id = $6 RETURNING *";
+  const { email, first_name, last_name } = await userValidationSchema.validateAsync(req.body);
+
+  // Check if user exists
+  const userCheck = await db.query("SELECT * FROM user_acount WHERE id = $1", [userId]);
+  if (userCheck.rows.length === 0) {
+    throw new AppError("User not found", 404);
+  }
+
+  const query = `
+    UPDATE user_acount 
+    SET email = $1, first_name = $2, last_name = $3, profile_img = $4, updated_at = $5 
+    WHERE id = $6 
+    RETURNING *`;
   const user = await db.query(query, [
     email,
     first_name,
